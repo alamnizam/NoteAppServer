@@ -1,4 +1,4 @@
-package com.codeturtle
+package com.codeturtle.application
 
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*

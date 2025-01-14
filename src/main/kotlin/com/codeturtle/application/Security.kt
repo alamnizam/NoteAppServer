@@ -1,4 +1,4 @@
-package com.codeturtle
+package com.codeturtle.application
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm

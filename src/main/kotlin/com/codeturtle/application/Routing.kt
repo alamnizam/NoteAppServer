@@ -1,4 +1,4 @@
-package com.codeturtle
+package com.codeturtle.application
 
 import io.ktor.server.application.*
 import io.ktor.server.response.*
