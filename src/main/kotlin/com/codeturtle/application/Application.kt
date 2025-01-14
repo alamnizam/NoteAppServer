@@ -1,5 +1,6 @@
 package com.codeturtle.application
 
+import com.codeturtle.repository.DatabaseFactory
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -7,6 +8,8 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
+    //Initializing database
+    DatabaseFactory.init()
     configureSerialization()
     configureSecurity()
     configureMonitoring()
