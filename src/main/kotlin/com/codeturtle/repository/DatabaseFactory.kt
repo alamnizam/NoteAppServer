@@ -1,5 +1,6 @@
 package com.codeturtle.repository
 
+import com.codeturtle.data.table.NoteTable
 import com.codeturtle.data.table.UserTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -15,6 +16,7 @@ object DatabaseFactory {
         Database.connect(hikari())
         transaction {
             SchemaUtils.create(UserTable)
+            SchemaUtils.create(NoteTable)
         }
     }
 

@@ -7,9 +7,9 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class NoteRepo {
-    suspend fun addNote(note: Note, email: String){
+    suspend fun addNote(note: Note, email: String) {
         dbQuery {
-            NoteTable.insert { nt->
+            NoteTable.insert { nt ->
                 nt[id] = note.id
                 nt[userEmail] = email
                 nt[noteTitle] = note.noteTitle
@@ -19,14 +19,14 @@ class NoteRepo {
         }
     }
 
-    suspend fun getAllNotes(email:String):List<Note> = dbQuery {
+    suspend fun getAllNotes(email: String): List<Note> = dbQuery {
         NoteTable.selectAll().where { NoteTable.userEmail.eq(email) }
             .mapNotNull { rowToNote(it) }
 
     }
 
 
-    suspend fun updateNote(note:Note,email: String){
+    suspend fun updateNote(note: Note, email: String) {
 
         dbQuery {
 
@@ -34,7 +34,7 @@ class NoteRepo {
                 where = {
                     NoteTable.userEmail.eq(email) and NoteTable.id.eq(note.id)
                 }
-            ){ nt->
+            ) { nt ->
                 nt[noteTitle] = note.noteTitle
                 nt[description] = note.description
                 nt[date] = note.date
@@ -44,23 +44,25 @@ class NoteRepo {
 
     }
 
-    suspend fun deleteNote(id:String){
+    suspend fun deleteNote(id: String, email: String) {
         dbQuery {
-            NoteTable.deleteWhere { NoteTable.id.eq(id) }
+            NoteTable.deleteWhere {
+                userEmail.eq(email) and NoteTable.id.eq(id)
+            }
         }
     }
 
 
-    private fun rowToNote(row:ResultRow?): Note? {
+    private fun rowToNote(row: ResultRow?): Note? {
 
-        if(row == null){
+        if (row == null) {
             return null
         }
 
         return Note(
             id = row[NoteTable.id],
             noteTitle = row[NoteTable.noteTitle],
-            description =  row[NoteTable.description],
+            description = row[NoteTable.description],
             date = row[NoteTable.date]
         )
 
