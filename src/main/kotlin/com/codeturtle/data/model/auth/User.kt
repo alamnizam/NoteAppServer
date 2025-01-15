@@ -1,4 +1,4 @@
-package com.codeturtle.data.model
+package com.codeturtle.data.model.auth
 
 data class User(
     val email:String,

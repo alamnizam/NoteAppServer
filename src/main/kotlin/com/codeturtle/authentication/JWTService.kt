@@ -2,7 +2,7 @@ package com.codeturtle.authentication
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.codeturtle.data.model.User
+import com.codeturtle.data.model.auth.User
 
 class JWTService {
     private val issuer = "noteServer"

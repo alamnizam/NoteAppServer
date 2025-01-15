@@ -1,6 +1,6 @@
 package com.codeturtle.repository
 
-import com.codeturtle.data.model.User
+import com.codeturtle.data.model.auth.User
 import com.codeturtle.data.table.UserTable
 import com.codeturtle.repository.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.ResultRow
@@ -25,7 +25,7 @@ class UserRepo {
             .singleOrNull()
     }
 
-    private fun rowToUser(row:ResultRow?):User?{
+    private fun rowToUser(row:ResultRow?): User?{
         if(row == null){
             return null
         }

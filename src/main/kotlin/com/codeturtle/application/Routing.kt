@@ -2,16 +2,21 @@ package com.codeturtle.application
 
 import com.codeturtle.authentication.JWTService
 import com.codeturtle.authentication.hash
-import com.codeturtle.data.model.User
+import com.codeturtle.data.model.auth.User
+import com.codeturtle.repository.UserRepo
+import com.codeturtle.routes.userRoutes
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Application.configureRouting() {
 
+fun Application.configureRouting() {
+    val db = UserRepo()
     val mJWTService = JWTService()
     val hashFunction = { secret: String -> hash(secret) }
     routing {
+        userRoutes(db, mJWTService, hashFunction)
+
         get("/") {
             call.respondText("Hello World!")
         }
@@ -24,5 +29,6 @@ fun Application.configureRouting() {
             val user = User(email,hashFunction(password),username)
             call.respond(mJWTService.generateToken(user))
         }
+
     }
 }
