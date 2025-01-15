@@ -14,7 +14,6 @@ fun Application.module() {
 
     val db = UserRepo()
 
-
     configureSerialization()
     configureSecurity()
     configureMonitoring()
