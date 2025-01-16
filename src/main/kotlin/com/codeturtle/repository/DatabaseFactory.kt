@@ -10,13 +10,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
 
-    fun init(){
+    fun init(url: String, user: String, password: String, driver: String) {
        val database =  Database.connect(
-           url = "jdbc:postgresql:note_db",
-           driver = "org.postgresql.Driver",
-           user = "postgres",
-           password = "Nizam@123"
-        )
+           url = url,
+           user = user,
+           password = password,
+           driver = driver
+       )
         transaction(database) {
             SchemaUtils.create(UserTable)
             SchemaUtils.create(NoteTable)

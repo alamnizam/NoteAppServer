@@ -9,7 +9,11 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     //Initializing database
-    DatabaseFactory.init()
+    val url = this.environment.config.property("db.url").getString()
+    val user = this.environment.config.property("db.user").getString()
+    val password = this.environment.config.property("db.password").getString()
+    val driver = this.environment.config.property("db.driver").getString()
+    DatabaseFactory.init(url,user,password,driver)
 
     configureSerialization()
     configureSecurity()
