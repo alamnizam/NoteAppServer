@@ -37,6 +37,4 @@ dependencies {
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
     implementation(libs.postgresql)
-
-    implementation("com.zaxxer:HikariCP:4.0.3")
 }
