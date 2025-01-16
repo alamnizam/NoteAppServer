@@ -1,14 +1,10 @@
-# Use an official OpenJDK image as a base
-FROM openjdk:11-jre-slim
+#FROM gradle:7-jdk11 AS build
+#COPY --chown=gradle:gradle . /home/gradle/src
+#WORKDIR /home/gradle/src
+#RUN gradle
 
-# Set working directory
-WORKDIR /app
-
-# Copy the fat JAR file into the Docker image
-COPY build/libs/noteServer-1.0.jar /app/noteServer.jar
-
-# Expose the port your app will run on
+FROM openjdk:11
 EXPOSE 8080
-
-# Command to run the application
-ENTRYPOINT ["java", "-jar", "/app/noteServer.jar"]
+WORKDIR /app
+COPY --from=build /home/gradle/src/build/libs/*.jar /app/noteServer-all.jar
+ENTRYPOINT ["java", "-jar", "/app/noteServer-all.jar"]
