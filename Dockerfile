@@ -1,4 +1,10 @@
-FROM openjdk:17-jdk-alpine3.14
+FROM gradle:7-jdk11 AS build
+COPY --chown=gradle:gradle . /home/gradle/src
+WORKDIR /home/gradle/src
+RUN gradle buildFatJar --no-daemon
+
+FROM openjdk:11
+EXPOSE 8080:8080
 RUN mkdir /app
-COPY ./build/libs/noteServer-all.jar /app/app.jar
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+COPY --from=build /home/gradle/src/build/libs/*.jar /app/noteServer-all.jar
+ENTRYPOINT ["java","-jar","/app/noteServer-all.jar"]
