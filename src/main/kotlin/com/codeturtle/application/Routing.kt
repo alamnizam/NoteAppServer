@@ -16,7 +16,7 @@ fun Application.configureRouting() {
     val userDB = UserRepo()
     val noteDB = NoteRepo()
     val mJWTService = JWTService(
-        secret = System.getenv("JWT_SECRET"),
+        secret = this.environment.config.property("jwt.secret").getString(),
         issuer = this.environment.config.property("jwt.issuer").getString(),
         audience = this.environment.config.property("jwt.audience").getString()
     )

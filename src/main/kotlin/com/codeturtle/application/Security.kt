@@ -18,7 +18,7 @@ fun Application.configureSecurity() {
         }
     }
     val mJWTService = JWTService(
-        secret = System.getenv("JWT_SECRET"),
+        secret = this.environment.config.property("jwt.secret").getString(),
         issuer = this.environment.config.property("jwt.issuer").getString(),
         audience = this.environment.config.property("jwt.audience").getString()
     )
@@ -30,7 +30,7 @@ fun Application.configureSecurity() {
                 mJWTService.validate(jwtCredential)
             }
             
-            challenge { defaultScheme, realm ->
+            challenge { _, _ ->
                 call.respond(HttpStatusCode.Unauthorized,"Token is invalid")
             }
         }
