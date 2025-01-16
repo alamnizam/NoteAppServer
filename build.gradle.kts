@@ -19,6 +19,12 @@ repositories {
     mavenCentral()
 }
 
+ktor {
+    fatJar {
+        archiveFileName.set("noteServer-all.jar")
+    }
+}
+
 dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation)
