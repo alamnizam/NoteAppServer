@@ -44,3 +44,18 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.postgresql)
 }
+
+tasks.jar {
+    archiveBaseName.set("noteServer")  // Set your JAR name
+    archiveVersion.set("1.0")
+
+    manifest {
+        attributes["Main-Class"] = "com.codeturtle.application.ApplicationKt"  // Replace with your main class
+    }
+
+    // Include dependencies in the fat JAR
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+
+    // Exclude unnecessary files (optional)
+    exclude("**/META-INF/*.SF", "**/META-INF/*.DSA", "**/META-INF/*.RSA")
+}
