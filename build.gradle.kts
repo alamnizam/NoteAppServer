@@ -20,8 +20,8 @@ repositories {
 }
 
 ktor {
-    fatJar {
-        archiveFileName.set("noteServer-all.jar")
+    docker {
+        jreVersion.set(JavaVersion.VERSION_17)
     }
 }
 
