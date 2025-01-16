@@ -5,10 +5,10 @@ FROM openjdk:11-jre-slim
 WORKDIR /app
 
 # Copy the fat JAR file into the Docker image
-COPY build/libs/noteServer-1.0.jar /app/noteServer-all.jar
+COPY build/libs/noteServer-1.0.jar /app/noteServer.jar
 
 # Expose the port your app will run on
 EXPOSE 8080
 
 # Command to run the application
-ENTRYPOINT ["java", "-jar", "/app/noteServer-all.jar"]
+ENTRYPOINT ["java", "-jar", "/app/noteServer.jar"]
