@@ -1,7 +1,6 @@
 package com.codeturtle.routes
 
 import com.codeturtle.data.model.auth.SimpleResponse
-import com.codeturtle.data.model.auth.User
 import com.codeturtle.data.model.note.Note
 import com.codeturtle.repository.NoteRepo
 import com.codeturtle.routes.utils.RouteConstants.CREATE_NOTE
@@ -10,6 +9,7 @@ import com.codeturtle.routes.utils.RouteConstants.NOTES
 import com.codeturtle.routes.utils.RouteConstants.UPDATE_NOTE
 import io.ktor.http.*
 import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -23,7 +23,8 @@ fun Route.noteRoutes(
                 call.receive<Note>()
             } catch (e: Exception) {
                 call.respond(
-                    HttpStatusCode.BadRequest, SimpleResponse(
+                    status = HttpStatusCode.BadRequest,
+                    message = SimpleResponse(
                         success = false,
                         message = "missing fields"
                     )
@@ -32,17 +33,29 @@ fun Route.noteRoutes(
             }
 
             try {
-                val email = call.principal<User>()!!.email
-                db.addNote(note, email)
-                call.respond(
-                    HttpStatusCode.OK, SimpleResponse(
-                        success = true,
-                        message = "Note Added Successfully!!"
+                val email = call.principal<JWTPrincipal>()?.getClaim("email",String::class)
+                if (!email.isNullOrEmpty()) {
+                    db.addNote(note, email)
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        message = SimpleResponse(
+                            success = true,
+                            message = "Note Added Successfully!!"
+                        )
                     )
-                )
+                }else{
+                    call.respond(
+                        status = HttpStatusCode.Unauthorized,
+                        message = SimpleResponse(
+                            success = false,
+                            message = "email authentication failed"
+                        )
+                    )
+                }
             } catch (e: Exception) {
                 call.respond(
-                    HttpStatusCode.Conflict, SimpleResponse(
+                    status = HttpStatusCode.Conflict,
+                    message = SimpleResponse(
                         success = false,
                         message = e.message ?: "Some problem occurred"
                     )
@@ -52,11 +65,19 @@ fun Route.noteRoutes(
 
         get(NOTES){
             try {
-                val email = call.principal<User>()!!.email
-                val notes = db.getAllNotes(email)
-                call.respond(HttpStatusCode.OK,notes)
+                val email = call.principal<JWTPrincipal>()?.getClaim("email",String::class)
+                if (!email.isNullOrEmpty()) {
+                    val notes = db.getAllNotes(email)
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        message = notes
+                    )
+                }
             } catch (e:Exception){
-                call.respond(HttpStatusCode.Conflict, emptyList<Note>())
+                call.respond(
+                    status = HttpStatusCode.NoContent,
+                    message = emptyList<Note>()
+                )
             }
         }
 
@@ -65,7 +86,8 @@ fun Route.noteRoutes(
                 call.receive<Note>()
             } catch (e: Exception) {
                 call.respond(
-                    HttpStatusCode.BadRequest, SimpleResponse(
+                    status = HttpStatusCode.BadRequest,
+                    message = SimpleResponse(
                         success = false,
                         message = "missing fields"
                     )
@@ -74,17 +96,21 @@ fun Route.noteRoutes(
             }
 
             try {
-                val email = call.principal<User>()!!.email
-                db.updateNote(note, email)
-                call.respond(
-                    HttpStatusCode.OK, SimpleResponse(
-                        success = true,
-                        message = "Note Updated Successfully!!"
+                val email = call.principal<JWTPrincipal>()?.getClaim("email",String::class)
+                if (!email.isNullOrEmpty()) {
+                    db.updateNote(note, email)
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        message = SimpleResponse(
+                            success = true,
+                            message = "Note Updated Successfully!!"
+                        )
                     )
-                )
+                }
             } catch (e: Exception) {
                 call.respond(
-                    HttpStatusCode.Conflict, SimpleResponse(
+                    status = HttpStatusCode.Conflict,
+                    message = SimpleResponse(
                         success = false,
                         message = e.message ?: "Some problem occurred"
                     )
@@ -96,23 +122,32 @@ fun Route.noteRoutes(
             val noteId = try {
                 call.request.queryParameters["id"]!!
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest,SimpleResponse(
-                    success = false,
-                    message = "QueryParameters: id is not present"
-                ))
+                call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    message = SimpleResponse(
+                        success = false,
+                        message = "QueryParameters: id is not present"
+                    )
+                )
                 return@delete
             }
 
             try {
-                val email = call.principal<User>()!!.email
-                db.deleteNote(noteId,email)
-                call.respond(HttpStatusCode.OK,SimpleResponse(
-                    success = true,
-                    message = "Note Deleted Successfully"
-                ))
+                val email = call.principal<JWTPrincipal>()?.getClaim("email",String::class)
+                if (!email.isNullOrEmpty()) {
+                    db.deleteNote(noteId,email)
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        message = SimpleResponse(
+                            success = true,
+                            message = "Note Deleted Successfully"
+                        )
+                    )
+                }
             } catch (e: Exception) {
                 call.respond(
-                    HttpStatusCode.Conflict, SimpleResponse(
+                    status = HttpStatusCode.Conflict,
+                    message = SimpleResponse(
                         success = false,
                         message = e.message ?: "Some problem occurred"
                     )

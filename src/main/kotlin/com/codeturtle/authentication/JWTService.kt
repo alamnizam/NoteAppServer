@@ -13,7 +13,7 @@ class JWTService(
 ) {
     fun generateToken(user: User): String {
         return JWT.create()
-            .withSubject("NoteAuthentication")
+            .withAudience(audience)
             .withIssuer(issuer)
             .withClaim("email",user.email)
             .sign(Algorithm.HMAC512(secret))
@@ -26,8 +26,12 @@ class JWTService(
         .build()
 
     fun validate(jwtCredential: JWTCredential) : JWTPrincipal?{
-        return jwtCredential.payload.getClaim("email").asString()
-            .takeIf { !it.isNullOrEmpty() }
-            ?.let { JWTPrincipal(jwtCredential.payload) }
+        if(jwtCredential.payload.audience.contains(audience)){
+            val email = jwtCredential.payload.claims["email"]?.asString()
+            println("email = $email")
+            return JWTPrincipal(jwtCredential.payload)
+        }else{
+            return null
+        }
     }
 }
