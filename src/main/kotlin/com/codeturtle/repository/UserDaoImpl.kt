@@ -7,25 +7,23 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 
-
-class UserRepo {
-    suspend fun addUser(user: User){
-        dbQuery{
-            UserTable.insert { ut->
+class UserDaoImpl : UserDao {
+    override suspend fun addUser(user: User): User? = dbQuery{
+           val insertStatement = UserTable.insert { ut->
                 ut[email] = user.email
                 ut[hashPassword] = user.hashPassword
                 ut[name] = user.name
             }
-        }
+        insertStatement.resultedValues?.singleOrNull()?.let(::rowToUser)
     }
 
-    suspend fun findUserByEmail(email:String) = dbQuery {
+    override suspend fun findUserByEmail(email: String): User? = dbQuery {
         UserTable.selectAll().where { UserTable.email.eq(email) }
             .map { rowToUser(it) }
             .singleOrNull()
     }
 
-    private fun rowToUser(row:ResultRow?): User?{
+    private fun rowToUser(row: ResultRow?): User?{
         if(row == null){
             return null
         }

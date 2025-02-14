@@ -1,4 +1,4 @@
-package com.codeturtle.data.model.auth
+package com.codeturtle.data.model
 
 data class SimpleResponse(
     val success: Boolean,

@@ -3,23 +3,23 @@ package com.codeturtle.routes
 import com.codeturtle.authentication.JWTService
 import com.codeturtle.data.model.auth.LoginRequest
 import com.codeturtle.data.model.auth.RegisterRequest
-import com.codeturtle.data.model.auth.SimpleResponse
+import com.codeturtle.data.model.SimpleResponse
 import com.codeturtle.data.model.auth.User
-import com.codeturtle.repository.UserRepo
+import com.codeturtle.repository.UserDao
 import com.codeturtle.routes.utils.RouteConstants.LOGIN_REQUEST
 import com.codeturtle.routes.utils.RouteConstants.REGISTER_REQUEST
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 
 fun Route.userRoutes(
-    db: UserRepo,
+    db: UserDao,
     mJWTService: JWTService,
     hashFunction: (String) -> String
 ) {
     post(REGISTER_REQUEST) {
-//        call.respondText("test register")
         val registerRequest = try {
             call.receive<RegisterRequest>()
         } catch (e: Exception) {
@@ -41,6 +41,14 @@ fun Route.userRoutes(
                     message = mJWTService.generateToken(user)
                 )
             )
+        } catch (ex: ExposedSQLException) {
+            call.respond(
+                status = HttpStatusCode.Conflict,
+                message = SimpleResponse(
+                    success = false,
+                    message = "(${registerRequest.email})-email already exists"
+                )
+            )
         } catch (e: Exception) {
             call.respond(
                 HttpStatusCode.Conflict, SimpleResponse(
@@ -51,7 +59,7 @@ fun Route.userRoutes(
         }
     }
 
-    post(LOGIN_REQUEST){
+    post(LOGIN_REQUEST) {
         val loginRequest = try {
             call.receive<LoginRequest>()
         } catch (e: Exception) {
@@ -71,7 +79,7 @@ fun Route.userRoutes(
                 call.respond(
                     HttpStatusCode.BadRequest, SimpleResponse(
                         success = false,
-                        message = "Wrong email ID"
+                        message = "Wrong email/password"
                     )
                 )
             } else {
@@ -86,7 +94,7 @@ fun Route.userRoutes(
                     call.respond(
                         HttpStatusCode.BadRequest, SimpleResponse(
                             success = false,
-                            message = "Password Incorrect!"
+                            message = "Wrong email/password"
                         )
                     )
                 }

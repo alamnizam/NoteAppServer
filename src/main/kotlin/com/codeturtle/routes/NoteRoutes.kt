@@ -1,8 +1,8 @@
 package com.codeturtle.routes
 
-import com.codeturtle.data.model.auth.SimpleResponse
+import com.codeturtle.data.model.SimpleResponse
 import com.codeturtle.data.model.note.Note
-import com.codeturtle.repository.NoteRepo
+import com.codeturtle.repository.NoteDao
 import com.codeturtle.routes.utils.RouteConstants.CREATE_NOTE
 import com.codeturtle.routes.utils.RouteConstants.DELETE_NOTE
 import com.codeturtle.routes.utils.RouteConstants.NOTES
@@ -13,9 +13,10 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 
 fun Route.noteRoutes(
-    db: NoteRepo
+    db: NoteDao
 ) {
     authenticate {
         post(CREATE_NOTE) {
@@ -33,7 +34,7 @@ fun Route.noteRoutes(
             }
 
             try {
-                val email = call.principal<JWTPrincipal>()?.getClaim("email",String::class)
+                val email = call.principal<JWTPrincipal>()?.getClaim("email", String::class)
                 if (!email.isNullOrEmpty()) {
                     db.addNote(note, email)
                     call.respond(
@@ -43,7 +44,7 @@ fun Route.noteRoutes(
                             message = "Note Added Successfully!!"
                         )
                     )
-                }else{
+                } else {
                     call.respond(
                         status = HttpStatusCode.Unauthorized,
                         message = SimpleResponse(
@@ -52,6 +53,14 @@ fun Route.noteRoutes(
                         )
                     )
                 }
+            } catch (ex: ExposedSQLException) {
+                call.respond(
+                    status = HttpStatusCode.Conflict,
+                    message = SimpleResponse(
+                        success = false,
+                        message = ex.message ?: "Some problem occurred"
+                    )
+                )
             } catch (e: Exception) {
                 call.respond(
                     status = HttpStatusCode.Conflict,
@@ -63,9 +72,9 @@ fun Route.noteRoutes(
             }
         }
 
-        get(NOTES){
+        get(NOTES) {
             try {
-                val email = call.principal<JWTPrincipal>()?.getClaim("email",String::class)
+                val email = call.principal<JWTPrincipal>()?.getClaim("email", String::class)
                 if (!email.isNullOrEmpty()) {
                     val notes = db.getAllNotes(email)
                     call.respond(
@@ -73,7 +82,7 @@ fun Route.noteRoutes(
                         message = notes
                     )
                 }
-            } catch (e:Exception){
+            } catch (e: Exception) {
                 call.respond(
                     status = HttpStatusCode.NoContent,
                     message = emptyList<Note>()
@@ -96,7 +105,7 @@ fun Route.noteRoutes(
             }
 
             try {
-                val email = call.principal<JWTPrincipal>()?.getClaim("email",String::class)
+                val email = call.principal<JWTPrincipal>()?.getClaim("email", String::class)
                 if (!email.isNullOrEmpty()) {
                     db.updateNote(note, email)
                     call.respond(
@@ -120,7 +129,7 @@ fun Route.noteRoutes(
 
         delete(DELETE_NOTE) {
             val noteId = try {
-                call.request.queryParameters["id"]!!
+                Integer.parseInt(call.request.queryParameters["id"])
             } catch (e: Exception) {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
@@ -133,9 +142,9 @@ fun Route.noteRoutes(
             }
 
             try {
-                val email = call.principal<JWTPrincipal>()?.getClaim("email",String::class)
+                val email = call.principal<JWTPrincipal>()?.getClaim("email", String::class)
                 if (!email.isNullOrEmpty()) {
-                    db.deleteNote(noteId,email)
+                    db.deleteNote(noteId, email)
                     call.respond(
                         status = HttpStatusCode.OK,
                         message = SimpleResponse(
