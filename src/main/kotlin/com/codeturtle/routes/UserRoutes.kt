@@ -22,7 +22,7 @@ fun Route.userRoutes(
     post(REGISTER_REQUEST) {
         val registerRequest = try {
             call.receive<RegisterRequest>()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             call.respond(
                 HttpStatusCode.BadRequest, SimpleResponse(
                     success = false,
@@ -53,7 +53,7 @@ fun Route.userRoutes(
                     message = mJWTService.generateToken(user)
                 )
             )
-        } catch (ex: ExposedSQLException) {
+        } catch (_: ExposedSQLException) {
             call.respond(
                 status = HttpStatusCode.Conflict,
                 message = SimpleResponse(
@@ -74,7 +74,7 @@ fun Route.userRoutes(
     post(LOGIN_REQUEST) {
         val loginRequest = try {
             call.receive<LoginRequest>()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             call.respond(
                 HttpStatusCode.BadRequest, SimpleResponse(
                     success = false,
