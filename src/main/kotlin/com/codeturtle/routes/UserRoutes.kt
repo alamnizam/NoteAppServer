@@ -34,7 +34,19 @@ fun Route.userRoutes(
 
         try {
             val user = User(registerRequest.email, hashFunction(registerRequest.password), registerRequest.name)
-            db.addUser(user)
+            val addedUser = db.addUser(user)
+
+            if (addedUser == null) {
+                call.respond(
+                    status = HttpStatusCode.Conflict,
+                    message = SimpleResponse(
+                        success = false,
+                        message = "(${registerRequest.email})-email already exists"
+                    )
+                )
+                return@post
+            }
+
             call.respond(
                 HttpStatusCode.OK, SimpleResponse(
                     success = true,

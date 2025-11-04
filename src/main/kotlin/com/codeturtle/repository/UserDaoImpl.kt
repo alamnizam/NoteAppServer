@@ -9,11 +9,17 @@ import org.jetbrains.exposed.sql.selectAll
 
 class UserDaoImpl : UserDao {
     override suspend fun addUser(user: User): User? = dbQuery{
-           val insertStatement = UserTable.insert { ut->
-                ut[email] = user.email
-                ut[hashPassword] = user.hashPassword
-                ut[name] = user.name
-            }
+        // Check if user already exists
+        val existingUser = findUserByEmail(user.email)
+        if (existingUser != null) {
+            return@dbQuery null
+        }
+
+        val insertStatement = UserTable.insert { ut->
+            ut[email] = user.email
+            ut[hashPassword] = user.hashPassword
+            ut[name] = user.name
+        }
         insertStatement.resultedValues?.singleOrNull()?.let(::rowToUser)
     }
 
